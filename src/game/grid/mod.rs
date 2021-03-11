@@ -1,6 +1,20 @@
 use ggez::graphics::{BlendMode, DrawParam, Drawable, Rect};
 use ggez::{graphics, Context, GameResult};
 
+/**
+    == == == == == == == == == == == == == == == == ==
+
+    GAME RULES:
+
+    a = alive
+    v = neighbor count
+
+        a == false && v == 3 ==> a = true
+        a == true && (v < 2 || v > 3) ==> a = false
+
+    == == == == == == == == == == == == == == == == ==
+**/
+
 pub struct Grid {
     pub dimensions: Option<Rect>,
     blend_mode: BlendMode,
