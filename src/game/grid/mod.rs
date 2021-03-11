@@ -1,5 +1,5 @@
-use ggez::graphics::{BlendMode, DrawParam, Drawable, Rect};
-use ggez::{graphics, Context, GameResult};
+use ggez::graphics;
+use ggez::graphics::Drawable;
 
 /**
     == == == == == == == == == == == == == == == == ==
@@ -16,8 +16,8 @@ use ggez::{graphics, Context, GameResult};
 **/
 
 pub struct Grid {
-    pub dimensions: Option<Rect>,
-    blend_mode: BlendMode,
+    pub dimensions: Option<graphics::Rect>,
+    blend_mode: graphics::BlendMode,
     size: f32,
     grid: Option<Vec<Vec<bool>>>,
 }
@@ -32,7 +32,7 @@ impl Grid {
     pub fn new(size: f32) -> Self {
         Self {
             dimensions: None,
-            blend_mode: BlendMode::Add,
+            blend_mode: graphics::BlendMode::Add,
             size,
             grid: None,
         }
@@ -58,7 +58,7 @@ impl Grid {
 }
 
 impl Drawable for Grid {
-    fn draw(&self, ctx: &mut Context, _param: DrawParam) -> GameResult<()> {
+    fn draw(&self, ctx: &mut ggez::Context, _param: graphics::DrawParam) -> ggez::GameResult<()> {
         if let Some(grid) = &self.grid {
             for (x, row) in grid.iter().enumerate() {
                 for (y, _) in row.iter().enumerate() {
@@ -76,7 +76,7 @@ impl Drawable for Grid {
                         [1.0, 1.0, 1.0, 0.25].into(),
                     )?;
 
-                    mesh.draw(ctx, DrawParam::default())?;
+                    mesh.draw(ctx, graphics::DrawParam::default())?;
                 }
             }
         }
@@ -84,17 +84,17 @@ impl Drawable for Grid {
         Ok(())
     }
 
-    fn dimensions(&self, _ctx: &mut Context) -> Option<Rect> {
+    fn dimensions(&self, _ctx: &mut ggez::Context) -> Option<graphics::Rect> {
         self.dimensions
     }
 
-    fn set_blend_mode(&mut self, mode: Option<BlendMode>) {
+    fn set_blend_mode(&mut self, mode: Option<graphics::BlendMode>) {
         if let Some(blend_mode) = mode {
             self.blend_mode = blend_mode;
         }
     }
 
-    fn blend_mode(&self) -> Option<BlendMode> {
+    fn blend_mode(&self) -> Option<graphics::BlendMode> {
         Some(self.blend_mode)
     }
 }
