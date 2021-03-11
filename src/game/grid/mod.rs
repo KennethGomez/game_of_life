@@ -2,16 +2,22 @@ use ggez::graphics::{BlendMode, DrawParam, Drawable, Rect};
 use ggez::{graphics, Context, GameResult};
 
 pub struct Grid {
-    dimensions: Rect,
+    pub dimensions: Option<Rect>,
     blend_mode: BlendMode,
     size: f32,
     grid: Option<Vec<Vec<bool>>>,
 }
 
 impl Grid {
-    pub fn new(dimensions: Rect, size: f32) -> Self {
+    pub fn update(&self) {
+        println!("xd")
+    }
+}
+
+impl Grid {
+    pub fn new(size: f32) -> Self {
         Self {
-            dimensions,
+            dimensions: None,
             blend_mode: BlendMode::Add,
             size,
             grid: None,
@@ -19,19 +25,21 @@ impl Grid {
     }
 
     pub fn setup(&mut self) {
-        let mut grid = Vec::new();
+        if let Some(dimensions) = self.dimensions {
+            let mut grid = Vec::new();
 
-        for _ in 0..((self.dimensions.w / self.size) as i32) {
-            let mut column = Vec::new();
+            for _ in 0..((dimensions.w / self.size) as i32) {
+                let mut column = Vec::new();
 
-            for _ in 0..((self.dimensions.h / self.size) as i32) {
-                column.push(true);
+                for _ in 0..((dimensions.h / self.size) as i32) {
+                    column.push(true);
+                }
+
+                grid.push(column);
             }
 
-            grid.push(column);
+            self.grid = Some(grid);
         }
-
-        self.grid = Some(grid);
     }
 }
 
@@ -63,7 +71,7 @@ impl Drawable for Grid {
     }
 
     fn dimensions(&self, _ctx: &mut Context) -> Option<Rect> {
-        Some(self.dimensions)
+        self.dimensions
     }
 
     fn set_blend_mode(&mut self, mode: Option<BlendMode>) {
