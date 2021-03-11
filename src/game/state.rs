@@ -1,5 +1,6 @@
+use crate::game::grid::Grid;
 use ggez::graphics;
-use ggez::graphics::Drawable;
+use ggez::graphics::{Drawable, Rect, DrawParam};
 use ggez::nalgebra as na;
 use ggez::{event, Context, GameResult};
 
@@ -13,21 +14,25 @@ impl GameState {
 
 impl event::EventHandler for GameState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+        println!("xd");
+
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
         graphics::clear(ctx, [0.0, 0.0, 0.0, 1.0].into());
 
-        let mut text = graphics::Text::new("Game of Life");
-        text.set_font(graphics::Font::default(), graphics::Scale::uniform(24.0));
+        let grid = Grid::new(Rect::new(
+            0f32,
+            0f32,
+            graphics::screen_coordinates(ctx).w,
+            graphics::screen_coordinates(ctx).h,
+        ));
 
-        let tx = graphics::screen_coordinates(ctx).w / 2.0 - (text.width(ctx) / 2) as f32;
-        let ty = graphics::screen_coordinates(ctx).h / 2.0 - (text.height(ctx) / 2) as f32;
-
-        text.draw(ctx, (na::Point2::new(tx, ty),).into())?;
+        grid.draw(ctx, DrawParam::default());
 
         graphics::present(ctx)?;
+
         Ok(())
     }
 }
