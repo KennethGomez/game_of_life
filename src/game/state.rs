@@ -17,9 +17,15 @@ impl GameState {
 
 impl event::EventHandler for GameState {
     fn update(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
-        while timer::check_update_time(ctx, self.update_time) {
-            self.grid.update();
-        }
+        // while timer::check_update_time(ctx, self.update_time) {
+        // }
+        let start = std::time::Instant::now();
+
+        self.grid.update();
+
+        let duration = start.elapsed();
+
+        println!("update\t\t\t\t{}ms", duration.as_millis());
 
         Ok(())
     }
@@ -38,7 +44,13 @@ impl event::EventHandler for GameState {
             self.grid.setup();
         }
 
+        let start = std::time::Instant::now();
+
         self.grid.draw(ctx, graphics::DrawParam::default())?;
+
+        let duration = start.elapsed();
+
+        println!("draw\t\t\t\t{}ms", duration.as_millis());
 
         graphics::present(ctx)?;
 

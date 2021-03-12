@@ -58,11 +58,45 @@ impl Grid {
             let mut grid = self.grid.clone().unwrap();
 
             for (x, y, cell) in self.clone() {
-                grid[x][y] = Cell::random();
+                grid[x][y] = match (cell, self.get_neighbor_count(x, y)) {
+                    (Cell::Alive, n) if n < 2 || n > 3 => Cell::Dead,
+                    (Cell::Alive, n) if n == 3 || n == 2 => Cell::Alive,
+                    (Cell::Dead, 3) => Cell::Alive,
+                    (c, _) => c,
+                };
             }
 
             self.grid = Some(grid)
         }
+    }
+
+    fn get_neighbor_count(&mut self, x: usize, y: usize) -> i32 {
+        let mut count = 0;
+
+        if let Some(grid) = &self.grid {
+            for x_off in vec![-1, 0, 1] {
+                for y_off in vec![-1, 0, 1] {
+                    let nx = x as i32 + x_off;
+                    let ny = y as i32 + y_off;
+
+                    if nx < 0 || nx >= grid.len() as i32 {
+                        continue;
+                    }
+
+                    if ny < 0 || ny >= grid[nx as usize].len() as i32 {
+                        continue;
+                    }
+
+                    if nx == x as i32 && ny == y as i32 {
+                        continue;
+                    }
+
+                    count += grid[nx as usize][ny as usize].clone() as i32;
+                }
+            }
+        }
+
+        count
     }
 }
 
@@ -89,8 +123,8 @@ impl Drawable for Grid {
                 );
 
                 let color = match cell {
-                    Cell::DEAD => [0.22, 0.25, 0.28, 1.0],
-                    Cell::ALIVE => [1.0, 1.0, 1.0, 0.25],
+                    Cell::Dead => [0.22, 0.25, 0.28, 1.0],
+                    Cell::Alive => [1.0, 1.0, 1.0, 0.25],
                 };
 
                 let stroke = graphics::Mesh::new_rectangle(
