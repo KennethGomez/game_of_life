@@ -53,8 +53,16 @@ impl Grid {
         == == == == == == == == == == == == == == == == ==
     **/
 
-    pub fn update(&self) {
-        println!("xd")
+    pub fn update(&mut self) {
+        if self.grid.is_some() {
+            let mut grid = self.grid.clone().unwrap();
+
+            for (x, y, cell) in self.clone() {
+                grid[x][y] = Cell::random();
+            }
+
+            self.grid = Some(grid)
+        }
     }
 }
 
@@ -64,7 +72,7 @@ impl Clone for Grid {
             dimensions: self.dimensions.clone(),
             blend_mode: self.blend_mode.clone(),
             size: self.size,
-            grid: self.grid.clone()
+            grid: self.grid.clone(),
         }
     }
 }
@@ -159,7 +167,7 @@ impl Iterator for GridIterator {
             if new_column != self.grid.len() {
                 self.current_column = new_column;
             } else {
-                return None
+                return None;
             }
         }
 
