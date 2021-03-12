@@ -1,5 +1,6 @@
 use ggez::graphics;
 use ggez::graphics::Drawable;
+use crate::game::grid::cell::Cell;
 
 /**
     == == == == == == == == == == == == == == == == ==
@@ -15,11 +16,13 @@ use ggez::graphics::Drawable;
     == == == == == == == == == == == == == == == == ==
 **/
 
+pub mod cell;
+
 pub struct Grid {
     pub dimensions: Option<graphics::Rect>,
     blend_mode: graphics::BlendMode,
     size: f32,
-    grid: Option<Vec<Vec<bool>>>,
+    grid: Option<Vec<Vec<Cell>>>,
 }
 
 impl Grid {
@@ -46,7 +49,7 @@ impl Grid {
                 let mut column = Vec::new();
 
                 for _ in 0..((dimensions.h / self.size) as i32) {
-                    column.push(true);
+                    column.push(Cell::random());
                 }
 
                 grid.push(column);
@@ -61,7 +64,7 @@ impl Drawable for Grid {
     fn draw(&self, ctx: &mut ggez::Context, _param: graphics::DrawParam) -> ggez::GameResult<()> {
         if let Some(grid) = &self.grid {
             for (x, row) in grid.iter().enumerate() {
-                for (y, _) in row.iter().enumerate() {
+                for (y, cell) in row.iter().enumerate() {
                     let rect = graphics::Rect::new(
                         x as f32 * self.size,
                         y as f32 * self.size,
@@ -69,14 +72,27 @@ impl Drawable for Grid {
                         self.size,
                     );
 
-                    let mesh = graphics::Mesh::new_rectangle(
+                    let color = match cell {
+                        Cell::DEAD => [0.22, 0.25, 0.28, 1.0],
+                        Cell::ALIVE => [1.0, 1.0, 1.0, 0.25],
+                    };
+
+                    let stroke = graphics::Mesh::new_rectangle(
                         ctx,
                         graphics::DrawMode::stroke(1.0),
                         rect,
-                        [1.0, 1.0, 1.0, 0.25].into(),
+                        [1.0, 1.0, 1.0, 1.0].into(),
                     )?;
 
-                    mesh.draw(ctx, graphics::DrawParam::default())?;
+                    let fill = graphics::Mesh::new_rectangle(
+                        ctx,
+                        graphics::DrawMode::fill(),
+                        rect,
+                        color.into(),
+                    )?;
+
+                    fill.draw(ctx, graphics::DrawParam::default())?;
+                    stroke.draw(ctx, graphics::DrawParam::default())?;
                 }
             }
         }
