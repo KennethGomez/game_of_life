@@ -1,6 +1,6 @@
 use crate::game::grid::cell::Cell;
-use ggez::graphics;
-use ggez::graphics::Drawable;
+use ggez::graphics::{spritebatch, Drawable};
+use ggez::{graphics, nalgebra as na, GameResult};
 
 pub mod cell;
 
@@ -114,36 +114,33 @@ impl Clone for Grid {
 impl Drawable for Grid {
     fn draw(&self, ctx: &mut ggez::Context, _param: graphics::DrawParam) -> ggez::GameResult<()> {
         if self.grid.is_some() {
+            let mut mb = graphics::MeshBuilder::new();
+
             for (x, y, cell) in self.clone() {
-                let rect = graphics::Rect::new(
+                let bounds = graphics::Rect::new(
                     x as f32 * self.size,
                     y as f32 * self.size,
                     self.size,
                     self.size,
                 );
 
-                let color = match cell {
-                    Cell::Dead => [0.22, 0.25, 0.28, 1.0],
-                    Cell::Alive => [1.0, 1.0, 1.0, 0.25],
-                };
-
-                let stroke = graphics::Mesh::new_rectangle(
-                    ctx,
-                    graphics::DrawMode::stroke(1.0),
-                    rect,
-                    [1.0, 1.0, 1.0, 1.0].into(),
-                )?;
-
-                let fill = graphics::Mesh::new_rectangle(
-                    ctx,
-                    graphics::DrawMode::fill(),
-                    rect,
-                    color.into(),
-                )?;
-
-                fill.draw(ctx, graphics::DrawParam::default())?;
-                stroke.draw(ctx, graphics::DrawParam::default())?;
+                mb.rectangle(
+                    graphics::DrawMode::Fill(graphics::FillOptions::default()),
+                    bounds,
+                    match cell {
+                        Cell::Dead => [0.22, 0.25, 0.28, 1.0].into(),
+                        Cell::Alive => [1.0, 1.0, 1.0, 0.25].into(),
+                    },
+                )
+                .rectangle(
+                    graphics::DrawMode::Stroke(graphics::StrokeOptions::default()),
+                    bounds,
+                    [1.0, 1.0, 1.0, 0.25].into(),
+                );
             }
+
+            mb.build(ctx)?
+                .draw(ctx, (na::Point2::new(0.0, 0.0),).into())?;
         }
 
         Ok(())
