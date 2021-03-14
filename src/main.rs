@@ -4,7 +4,7 @@ use ggez::{conf, event};
 use game_of_life::game::state::GameState;
 
 pub fn main() -> ggez::GameResult {
-    let w_mode: conf::WindowMode = conf::WindowMode::default().dimensions(512.0, 512.0);
+    let w_mode: conf::WindowMode = conf::WindowMode::default().dimensions(1000.0, 800.0);
     let w_setup: conf::WindowSetup = conf::WindowSetup::default().title("Game of life");
 
     let cb = ggez::ContextBuilder::new("game_of_life", "Kenneth <kennethgomezfdz@gmail.com>")
@@ -12,6 +12,6 @@ pub fn main() -> ggez::GameResult {
         .window_setup(w_setup);
 
     let (ctx, event_loop) = &mut cb.build()?;
-    let state = &mut GameState::new(1)?;
+    let state = &mut GameState::new(0)?;
     event::run(ctx, event_loop, state)
 }

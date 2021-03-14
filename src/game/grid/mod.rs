@@ -1,6 +1,5 @@
 use crate::game::grid::cell::Cell;
-use ggez::graphics::{spritebatch, Drawable};
-use ggez::{graphics, nalgebra as na, GameResult};
+use ggez::{graphics, nalgebra as na};
 
 pub mod cell;
 
@@ -111,7 +110,7 @@ impl Clone for Grid {
     }
 }
 
-impl Drawable for Grid {
+impl graphics::Drawable for Grid {
     fn draw(&self, ctx: &mut ggez::Context, _param: graphics::DrawParam) -> ggez::GameResult<()> {
         if self.grid.is_some() {
             let mut mb = graphics::MeshBuilder::new();

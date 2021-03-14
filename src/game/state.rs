@@ -9,7 +9,7 @@ pub struct GameState {
 
 impl GameState {
     pub fn new(update_time: u32) -> ggez::GameResult<Self> {
-        let grid = Grid::new(16.0);
+        let grid = Grid::new(10.0);
 
         Ok(Self { update_time, grid })
     }
@@ -17,15 +17,13 @@ impl GameState {
 
 impl event::EventHandler for GameState {
     fn update(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
-        // while timer::check_update_time(ctx, self.update_time) {
-        // }
-        let start = std::time::Instant::now();
-
-        self.grid.update();
-
-        let duration = start.elapsed();
-
-        println!("update\t\t\t\t{}ms", duration.as_millis());
+        if self.update_time == 0 {
+            self.grid.update();
+        } else {
+            while timer::check_update_time(ctx, self.update_time) {
+                self.grid.update();
+            }
+        }
 
         Ok(())
     }
@@ -44,13 +42,7 @@ impl event::EventHandler for GameState {
             self.grid.setup();
         }
 
-        let start = std::time::Instant::now();
-
         self.grid.draw(ctx, graphics::DrawParam::default())?;
-
-        let duration = start.elapsed();
-
-        println!("draw\t\t\t\t{}ms", duration.as_millis());
 
         graphics::present(ctx)?;
 
