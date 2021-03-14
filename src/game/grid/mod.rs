@@ -5,7 +5,6 @@ pub mod cell;
 
 pub struct Grid {
     dimensions: Option<graphics::Rect>,
-    setup: bool,
     blend_mode: graphics::BlendMode,
     size: f32,
     grid: Option<Vec<Vec<Cell>>>,
@@ -15,38 +14,28 @@ impl Grid {
     pub fn new(size: f32) -> Self {
         Self {
             dimensions: None,
-            setup: false,
             blend_mode: graphics::BlendMode::Add,
             size,
             grid: None,
         }
     }
 
-    pub fn setup_if_needed(&mut self, ctx: &ggez::Context) {
-        if self.dimensions == None {
-            let dimensions = graphics::Rect::new(
-                0.0,
-                0.0,
-                graphics::screen_coordinates(ctx).w,
-                graphics::screen_coordinates(ctx).h,
-            );
+    pub fn initialize(&mut self, dimensions: graphics::Rect) {
+        self.dimensions = Some(dimensions);
 
+        let mut grid = Vec::new();
 
-            let mut grid = Vec::new();
+        for _ in 0..((dimensions.w / self.size) as i32) {
+            let mut column = Vec::new();
 
-            for _ in 0..((dimensions.w / self.size) as i32) {
-                let mut column = Vec::new();
-
-                for _ in 0..((dimensions.h / self.size) as i32) {
-                    column.push(Cell::random());
-                }
-
-                grid.push(column);
+            for _ in 0..((dimensions.h / self.size) as i32) {
+                column.push(Cell::random());
             }
 
-            self.dimensions = Some(dimensions);
-            self.grid = Some(grid);
+            grid.push(column);
         }
+
+        self.grid = Some(grid);
     }
 
     /**
@@ -63,21 +52,33 @@ impl Grid {
         == == == == == == == == == == == == == == == == ==
     **/
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self) -> (u32, u32) {
+        let mut alive: u32 = 0;
+        let mut dead: u32 = 0;
+
         if self.grid.is_some() {
             let mut grid = self.grid.clone().unwrap();
 
             for (x, y, cell) in self.clone() {
-                grid[x][y] = match (cell, self.get_neighbor_count(x, y)) {
+                let cell = match (cell, self.get_neighbor_count(x, y)) {
                     (Cell::Alive, n) if n < 2 || n > 3 => Cell::Dead,
                     (Cell::Alive, n) if n == 3 || n == 2 => Cell::Alive,
                     (Cell::Dead, 3) => Cell::Alive,
                     (c, _) => c,
                 };
+
+                grid[x][y] = cell.clone();
+
+                match cell {
+                    Cell::Dead => dead += 1,
+                    Cell::Alive => alive += 1
+                }
             }
 
             self.grid = Some(grid)
         }
+
+        (alive, dead)
     }
 
     fn get_neighbor_count(&mut self, x: usize, y: usize) -> i32 {
@@ -114,7 +115,6 @@ impl Clone for Grid {
     fn clone(&self) -> Self {
         Self {
             dimensions: self.dimensions.clone(),
-            setup: self.setup.clone(),
             blend_mode: self.blend_mode.clone(),
             size: self.size,
             grid: self.grid.clone(),
