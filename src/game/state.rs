@@ -1,6 +1,6 @@
 use crate::game::grid::Grid;
 use ggez::graphics::Drawable;
-use ggez::{event, graphics, timer};
+use ggez::{event, graphics, timer, nalgebra as na};
 
 pub struct GameState {
     update_time: u32,
@@ -31,18 +31,8 @@ impl event::EventHandler for GameState {
     fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
         graphics::clear(ctx, [0.22, 0.25, 0.28, 1.0].into());
 
-        if self.grid.dimensions == None {
-            self.grid.dimensions = Some(graphics::Rect::new(
-                0.0,
-                0.0,
-                graphics::screen_coordinates(ctx).w,
-                graphics::screen_coordinates(ctx).h,
-            ));
-
-            self.grid.setup();
-        }
-
-        self.grid.draw(ctx, graphics::DrawParam::default())?;
+        self.grid.setup_if_needed(ctx);
+        self.grid.draw(ctx, (na::Point2::new(0.0, 0.0),).into())?;
 
         graphics::present(ctx)?;
 

@@ -1,10 +1,11 @@
 use crate::game::grid::cell::Cell;
-use ggez::{graphics, nalgebra as na};
+use ggez::graphics;
 
 pub mod cell;
 
 pub struct Grid {
-    pub dimensions: Option<graphics::Rect>,
+    dimensions: Option<graphics::Rect>,
+    setup: bool,
     blend_mode: graphics::BlendMode,
     size: f32,
     grid: Option<Vec<Vec<Cell>>>,
@@ -14,14 +15,23 @@ impl Grid {
     pub fn new(size: f32) -> Self {
         Self {
             dimensions: None,
+            setup: false,
             blend_mode: graphics::BlendMode::Add,
             size,
             grid: None,
         }
     }
 
-    pub fn setup(&mut self) {
-        if let Some(dimensions) = self.dimensions {
+    pub fn setup_if_needed(&mut self, ctx: &ggez::Context) {
+        if self.dimensions == None {
+            let dimensions = graphics::Rect::new(
+                0.0,
+                0.0,
+                graphics::screen_coordinates(ctx).w,
+                graphics::screen_coordinates(ctx).h,
+            );
+
+
             let mut grid = Vec::new();
 
             for _ in 0..((dimensions.w / self.size) as i32) {
@@ -34,6 +44,7 @@ impl Grid {
                 grid.push(column);
             }
 
+            self.dimensions = Some(dimensions);
             self.grid = Some(grid);
         }
     }
@@ -103,6 +114,7 @@ impl Clone for Grid {
     fn clone(&self) -> Self {
         Self {
             dimensions: self.dimensions.clone(),
+            setup: self.setup.clone(),
             blend_mode: self.blend_mode.clone(),
             size: self.size,
             grid: self.grid.clone(),
@@ -111,7 +123,7 @@ impl Clone for Grid {
 }
 
 impl graphics::Drawable for Grid {
-    fn draw(&self, ctx: &mut ggez::Context, _param: graphics::DrawParam) -> ggez::GameResult<()> {
+    fn draw(&self, ctx: &mut ggez::Context, param: graphics::DrawParam) -> ggez::GameResult<()> {
         if self.grid.is_some() {
             let mut mb = graphics::MeshBuilder::new();
 
@@ -138,8 +150,7 @@ impl graphics::Drawable for Grid {
                 );
             }
 
-            mb.build(ctx)?
-                .draw(ctx, (na::Point2::new(0.0, 0.0),).into())?;
+            mb.build(ctx)?.draw(ctx, param)?;
         }
 
         Ok(())
